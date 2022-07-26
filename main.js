@@ -1,6 +1,64 @@
 "use strict";
 
 (function () {
+    let serialize = window.serialize = {};
+
+    serialize.jsonDump = function jsonDump() {
+        let table = document.getElementById("table");
+
+        let width = table.width;
+        let height = table.height;
+
+        let result = {};
+
+        result.width = width;
+        result.height = height;
+        let data = result.data = [];
+
+        for (let y = 0; y < height; ++y) {
+            let row = data[y] = [];
+            for (let x = 0; x < width; ++x) {
+                let cellValue = document.getElementById(`input_${x}_${y}`);
+                row[x] = cellValue.value;
+            }
+        }
+        return result;
+    }
+
+    function sanitizeCsv(str) {
+        let useQuotation = false;
+        if (str.indexOf(",") != -1 || str.indexOf("\"") != -1) {
+            useQuotation = true;
+        }
+        str = str.replaceAll("\"", "\"\"");
+        if (useQuotation) {
+            str = `"${str}"`;
+        }
+        return str;
+    }
+
+    serialize.csvDump = function csvDump() {
+        let table = document.getElementById("table");
+
+        let width = table.width;
+        let height = table.height;
+
+        let rows = [];
+
+        for (let y = 0; y < height; ++y) {
+            let row = "";
+            for (let x = 0; x < width; ++x) {
+                let cellValue = document.getElementById(`input_${x}_${y}`);
+                row += sanitizeCsv(cellValue.value) + ",";
+            }
+            rows.push(row);
+        }
+
+        return rows.join("\n");
+    }
+})();
+
+(function () {
     function ce(tag, className, attributes) {
         let element = document.createElement(tag);
         if (typeof className !== "undefined" && className != "") {
@@ -18,8 +76,13 @@
         let cell = document.createElement("td");
 
         let wrapper = cell.appendChild(ce("div", "cellwrapper"));
-        wrapper.appendChild(ce("div", "label", { id: `label_${x}_${y}` })).innerHTML = ".";
-        wrapper.appendChild(ce("input", "cell", { id: `input_${x}_${y}` }));
+        let label = wrapper.appendChild(ce("div", "label", { id: `label_${x}_${y}` }));
+        label.innerHTML = ".";
+        label.x = x;
+        label.y = y;
+        let input = wrapper.appendChild(ce("input", "cell", { id: `input_${x}_${y}` }));
+        input.x = x;
+        input.y = y;
 
         return cell;
     }
@@ -45,13 +108,10 @@
         return table;
     }
 
-    function serialize() {
-        let table = document.getElementById("table");
-        return table.width + "," + table.height;
-    }
 
     window.save = function save() {
-        console.log(serialize());
+        console.log(serialize.jsonDump());
+        console.log(serialize.csvDump());
     }
 
     let container = document.getElementById("tableContainer");
