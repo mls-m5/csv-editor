@@ -1,0 +1,3 @@
+[submodule "mutils.js"]
+	path = mutils.js
+	url = https://github.com/mls-m5/mutils.js
