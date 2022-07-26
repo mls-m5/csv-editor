@@ -4,7 +4,7 @@
     let serialize = window.serialize = {};
 
     serialize.jsonDump = function jsonDump() {
-        let table = document.getElementById("table");
+        let table = byId("table");
 
         let width = table.width;
         let height = table.height;
@@ -18,7 +18,7 @@
         for (let y = 0; y < height; ++y) {
             let row = data[y] = [];
             for (let x = 0; x < width; ++x) {
-                let cellValue = document.getElementById(`input_${x}_${y}`);
+                let cellValue = byId(`input_${x}_${y}`);
                 row[x] = cellValue.value;
             }
         }
@@ -38,7 +38,7 @@
     }
 
     serialize.csvDump = function csvDump() {
-        let table = document.getElementById("table");
+        let table = byId("table");
 
         let width = table.width;
         let height = table.height;
@@ -48,7 +48,7 @@
         for (let y = 0; y < height; ++y) {
             let row = "";
             for (let x = 0; x < width; ++x) {
-                let cellValue = document.getElementById(`input_${x}_${y}`);
+                let cellValue = byId(`input_${x}_${y}`);
                 row += sanitizeCsv(cellValue.value) + ",";
             }
             rows.push(row);
@@ -72,6 +72,18 @@
         return element;
     }
 
+    function getInput(x, y) {
+        return byId(`input_${x}_${y}`)
+    }
+
+    function getLabel(x, y) {
+        return byId(`label_${x}_${y}`);
+    }
+
+    function updateCell(x, y) {
+        getLabel(x, y).innerText = getInput(x, y).value;
+    }
+
     function createWrapper(x, y) {
         let cell = document.createElement("td");
 
@@ -83,6 +95,7 @@
         let input = wrapper.appendChild(ce("input", "cell", { id: `input_${x}_${y}` }));
         input.x = x;
         input.y = y;
+        input.on("change", () => updateCell(x, y));
 
         return cell;
     }
@@ -114,7 +127,6 @@
         console.log(serialize.csvDump());
     }
 
-    let container = document.getElementById("tableContainer");
+    let container = byId("tableContainer");
     container.appendChild(createTable(3, 4));
-
 })();
